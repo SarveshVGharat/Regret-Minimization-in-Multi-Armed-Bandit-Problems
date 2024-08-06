@@ -42,7 +42,7 @@ class Eps_Greedy(Algorithm):
     def __init__(self, num_arms, horizon):
         super().__init__(num_arms, horizon)
         # Extra member variables to keep track of the state
-        self.eps = 0.1
+        self.eps = 0.05
         self.counts = np.zeros(num_arms)
         self.values = np.zeros(num_arms)
     
@@ -59,6 +59,48 @@ class Eps_Greedy(Algorithm):
         new_value = ((n - 1) / n) * value + (1 / n) * reward
         self.values[arm_index] = new_value
 
+# class Greedy(Algorithm):
+#     def __init__(self, num_arms, horizon):
+#         super().__init__(num_arms, horizon)
+#         # Extra member variables to keep track of the state
+#         self.eps = 0
+#         self.counts = np.ones(num_arms)
+#         self.values = np.append(np.zeros(int(num_arms/2)),np.ones(int(num_arms/2)))
+    
+#     def give_pull(self):
+#         if np.random.random() < self.eps:
+#             return np.random.randint(self.num_arms)
+#         else:
+#             return np.argmax(self.values)
+    
+#     def get_reward(self, arm_index, reward):
+#         self.counts[arm_index] += 1
+#         n = self.counts[arm_index]
+#         value = self.values[arm_index]
+#         new_value = ((n - 1) / n) * value + (1 / n) * reward
+#         self.values[arm_index] = new_value
+
+
+class Greedy(Algorithm):
+    def __init__(self, num_arms, horizon):
+        super().__init__(num_arms, horizon)
+        # Extra member variables to keep track of the state
+        self.counts = np.zeros(num_arms)
+        self.values = np.zeros(num_arms)
+    
+    def give_pull(self):
+        t = np.sum(self.counts) 
+        if int(t) < int(self.num_arms):
+            return int(t)
+        else:
+            return np.argmax(self.values)
+    
+    def get_reward(self, arm_index, reward):
+        self.counts[arm_index] += 1
+        n = self.counts[arm_index]
+        value = self.values[arm_index]
+        new_value = ((n - 1) / n) * value + (1 / n) * reward
+        self.values[arm_index] = new_value
 
 # START EDITING HERE
 # You can use this space to define any helper functions that you need
@@ -124,6 +166,48 @@ class UCB(Algorithm):
             self.values[arm_index] += 1
 
         # END EDITING HERE
+
+class Successive_Elimination(Algorithm):
+    def __init__(self, num_arms, horizon):
+        super().__init__(num_arms, horizon)
+        # You can add any other variables you need here
+        # START EDITING HERE
+
+        self.counts = np.zeros(num_arms)
+        self.values = np.zeros(num_arms)
+        self.bonus  = np.zeros(num_arms)
+        self.mean   = np.zeros(num_arms)
+        self.ucb    = np.zeros(num_arms)
+        self.lcb    = np.zeros(num_arms)
+
+        # END EDITING HERE
+    
+    def give_pull(self):
+        # START EDITING HERE
+
+        t = np.sum(self.counts) 
+        
+        if int(t) < int(self.num_arms):
+            return int(t)
+        else:
+            self.mean  = self.values/self.counts
+            self.bonus = np.sqrt(2*math.log(t)/self.counts)
+            self.ucb   = self.mean + self.bonus
+            self.lcb   = self.mean - self.bonus
+            for i in range(int(self.num_arms)):
+                if np.max(self.lcb) > self.ucb[i]:
+                    self.counts[i] = 10*self.horizon
+            return np.argmin(self.counts)
+
+        # END EDITING HERE
+    
+    def get_reward(self, arm_index, reward):
+        # START EDITING HERE
+
+        self.counts[arm_index] +=1
+        if reward == 1:
+            self.values[arm_index] += 1
+
 
 class KL_UCB(Algorithm):
     def __init__(self, num_arms, horizon):

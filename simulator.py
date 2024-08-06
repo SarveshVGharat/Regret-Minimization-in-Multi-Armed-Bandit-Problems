@@ -2,7 +2,7 @@
 # do not modify! (except final few lines)
 
 from bernoulli_bandit import *
-from task1 import Algorithm, Eps_Greedy, UCB, KL_UCB, Thompson_Sampling
+from task1 import Algorithm, Eps_Greedy, Greedy, UCB, KL_UCB, Thompson_Sampling, Successive_Elimination
 from task2 import AlgorithmBatched
 from task3 import AlgorithmManyArms
 from multiprocessing import Pool
@@ -109,8 +109,10 @@ if __name__ == '__main__':
   # 20 arms with uniformly distributed means
   probs = [i/20 for i in range(20)]
 
-  # task1(Eps_Greedy, probs)
-  # task1(UCB, probs)
+  task1(Eps_Greedy, probs)
+  task1(Greedy, probs)
+  task1(UCB, probs)
+  task1(Successive_Elimination, probs)
   # task1(KL_UCB, probs) 
   # task1(Thompson_Sampling, probs)
 
